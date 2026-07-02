@@ -7,6 +7,7 @@ on:
     types: [completed]
 
 permissions:
+  contents: read
   packages: write
 
 jobs:
@@ -14,39 +15,50 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
-      - name: Resolve package name and grant Actions access
+      - name: Grant Actions read access to consumer repositories
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           ORG="FremontGlobalSolutions"
           CONSUMER_REPO_IDS="1027727247 1263804260 1236692283"
+          CANDIDATE_NAMES=(
+            "locale-switcher"
+            "@fremontglobalsolutions%2Flocale-switcher"
+            "fremontglobalsolutions-locale-switcher"
+          )
 
-          echo "Listing npm packages in ${ORG}..."
-          gh api "orgs/${ORG}/packages?package_type=npm" > packages.json
-          cat packages.json
+          PACKAGE_NAME=""
+          for candidate in "${CANDIDATE_NAMES[@]}"; do
+            echo "Probing package name: ${candidate}"
+            if gh api "orgs/${ORG}/packages/npm/${candidate}" >/dev/null 2>&1; then
+              PACKAGE_NAME="${candidate}"
+              break
+            fi
+          done
 
-          PACKAGE_NAME="$(node -e "
-            const pkgs = require('./packages.json');
-            const match = pkgs.find((p) =>
-              /locale-switcher/i.test(p.name) ||
-              /locale-switcher/i.test(p.html_url || '')
-            );
-            if (!match) {
-              console.error('Could not find locale-switcher package in org package list');
-              process.exit(1);
-            }
-            console.log(match.name);
-          ")"
+          if [ -z "${PACKAGE_NAME}" ]; then
+            echo "Could not resolve package via direct GET; trying org package list..."
+            gh api "orgs/${ORG}/packages?package_type=npm" | tee packages.json
+            PACKAGE_NAME="$(node -e "
+              const pkgs = require('./packages.json');
+              const match = pkgs.find((p) => /locale-switcher/i.test(p.name) || /locale-switcher/i.test(p.html_url || ''));
+              if (!match) process.exit(1);
+              console.log(match.name);
+            ")"
+          fi
 
           echo "Using package name: ${PACKAGE_NAME}"
 
           for repo_id in ${CONSUMER_REPO_IDS}; do
             echo "Granting Actions access to repository id ${repo_id}..."
-            gh api --method PUT \
+            if gh api --method PUT \
               -H "Accept: application/vnd.github+json" \
-              "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/actions/permissions/repositories/${repo_id}" \
-              || gh api --method PUT \
+              "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/actions/permissions/repositories/${repo_id}"; then
+              continue
+            fi
+            echo "Actions permissions endpoint failed; trying repository grant..."
+            gh api --method PUT \
               -H "Accept: application/vnd.github+json" \
               "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/repositories/${repo_id}" \
               -f permission=read
