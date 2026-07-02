@@ -1,0 +1,38 @@
+{
+  "name": "@fremont/locale-switcher",
+  "version": "0.1.0",
+  "description": "Shared locale dropdown UI for Fremont marketing sites",
+  "type": "module",
+  "sideEffects": [
+    "*.scss",
+    "*.css"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.scss": "./src/styles/locale-switcher.scss"
+  },
+  "files": [
+    "dist",
+    "src/styles"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "typescript": "^5.8.3"
+  }
+}
