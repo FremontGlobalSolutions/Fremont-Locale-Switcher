@@ -4,29 +4,42 @@
 
 Consumer repos (`Fremont-Global-Web`, `Fremont-AgentOps-Web`, `Fremont-AgentOps-UI`) must be granted read access or their CI `npm ci` will fail with 401/403.
 
-## Consumer CI access (package is public)
+## Consumer CI access (PAT secret)
 
-This package is **public**. Consumer workflows authenticate with the built-in
-`GITHUB_TOKEN` (`packages: read`) — no per-repo grant and no extra secret is
-required. GitHub Packages still requires *a* token to pull, but any valid
-`GITHUB_TOKEN` works.
+The default cross-repo `GITHUB_TOKEN` cannot read this org package unless the
+package is public/internal or the consumer repo is explicitly granted access —
+and that "Manage Actions access" UI is not reliably available for npm packages
+in this org. The robust, portable fix is a **PAT secret**.
 
-### Making the package public (one-time)
+Consumer workflows authenticate `npm ci` with:
 
-1. Open the package page:  
-   https://github.com/orgs/FremontGlobalSolutions/packages/npm/package/locale-switcher
+```yaml
+NODE_AUTH_TOKEN: ${{ secrets.PACKAGES_READ_TOKEN || secrets.GITHUB_TOKEN }}
+```
 
-2. Right sidebar → **Package settings**.
+so they use the PAT when present and fall back to `GITHUB_TOKEN` otherwise.
 
-3. Bottom of the page → **Danger Zone** → **Change visibility** → **Public**
-   (type `locale-switcher` to confirm).
+### One-time setup
 
-### If you keep it private instead
+1. Create a **classic** personal access token:  
+   https://github.com/settings/tokens → **Generate new token (classic)**  
+   Scopes: `read:packages` (add `repo` if the package/repo is private).
 
-You must either grant each consumer repo access (package settings →
-**Manage Actions access** → **Add repository**, when available) or switch
-consumer workflows to a PAT secret with `read:packages` (name it something
-other than `GITHUB_*`, e.g. `PACKAGES_READ_TOKEN`).
+2. Add it as an **organization secret** so all consumers can use it:  
+   https://github.com/organizations/FremontGlobalSolutions/settings/secrets/actions  
+   → **New organization secret**  
+   - Name: `PACKAGES_READ_TOKEN` (must **not** start with `GITHUB_`)  
+   - Value: the PAT  
+   - Repository access: `Fremont-Global-Web`, `Fremont-AgentOps-Web`, `Fremont-AgentOps-UI`
+     (or all repos).
+
+3. Re-run CI on the consumer branches.
+
+### Alternative: make the package public/internal
+
+If org policy allows it, set the package visibility on its settings page
+(**Danger Zone → Change visibility**). Once public/internal, the built-in
+`GITHUB_TOKEN` fallback works with no PAT.
 
 ## Local development
 
