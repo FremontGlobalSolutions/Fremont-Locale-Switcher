@@ -14,21 +14,42 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
-      - name: Grant Actions read access to consumer repositories
+      - name: Resolve package name and grant Actions access
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          PACKAGE="locale-switcher"
           ORG="FremontGlobalSolutions"
-          for repo_id in \
-            1027727247 \
-            1263804260 \
-            1236692283
-          do
-            echo "Granting package access to repository id ${repo_id}..."
+          CONSUMER_REPO_IDS="1027727247 1263804260 1236692283"
+
+          echo "Listing npm packages in ${ORG}..."
+          gh api "orgs/${ORG}/packages?package_type=npm" > packages.json
+          cat packages.json
+
+          PACKAGE_NAME="$(node -e "
+            const pkgs = require('./packages.json');
+            const match = pkgs.find((p) =>
+              /locale-switcher/i.test(p.name) ||
+              /locale-switcher/i.test(p.html_url || '')
+            );
+            if (!match) {
+              console.error('Could not find locale-switcher package in org package list');
+              process.exit(1);
+            }
+            console.log(match.name);
+          ")"
+
+          echo "Using package name: ${PACKAGE_NAME}"
+
+          for repo_id in ${CONSUMER_REPO_IDS}; do
+            echo "Granting Actions access to repository id ${repo_id}..."
             gh api --method PUT \
               -H "Accept: application/vnd.github+json" \
-              "orgs/${ORG}/packages/npm/${PACKAGE}/actions/permissions/repositories/${repo_id}"
+              "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/actions/permissions/repositories/${repo_id}" \
+              || gh api --method PUT \
+              -H "Accept: application/vnd.github+json" \
+              "orgs/${ORG}/packages/npm/${PACKAGE_NAME}/repositories/${repo_id}" \
+              -f permission=read
           done
+
           echo "Done. Consumer repos: Fremont-Global-Web, Fremont-AgentOps-Web, Fremont-AgentOps-UI"
