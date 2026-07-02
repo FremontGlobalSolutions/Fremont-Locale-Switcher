@@ -1,4 +1,4 @@
-# @fremont/locale-switcher
+# @fremontglobalsolutions/locale-switcher
 
 Shared locale dropdown UI (flags + pill trigger + accessible listbox panel) for Fremont web apps.
 
@@ -8,16 +8,16 @@ Published to GitHub Packages:
 
 ```bash
 # .npmrc (repo root or ~/.npmrc)
-@fremont:registry=https://npm.pkg.github.com
+@fremontglobalsolutions:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
 
-npm install @fremont/locale-switcher
+npm install @fremontglobalsolutions/locale-switcher
 ```
 
 In `package.json`:
 
 ```json
-"@fremont/locale-switcher": "0.1.0"
+"@fremontglobalsolutions/locale-switcher": "0.1.0"
 ```
 
 For local sibling-repo development you can still use:
@@ -26,14 +26,14 @@ For local sibling-repo development you can still use:
 npm install file:../Fremont-Locale-Switcher
 ```
 
-Add `transpilePackages: ['@fremont/locale-switcher']` to `next.config.mjs` / `next.config.ts`.
+Add `transpilePackages: ['@fremontglobalsolutions/locale-switcher']` to `next.config.mjs` / `next.config.ts`.
 
 ## Styles
 
 Import in your global stylesheet:
 
 ```scss
-@import '@fremont/locale-switcher/styles.scss';
+@import '@fremontglobalsolutions/locale-switcher/styles.scss';
 ```
 
 ## Variants
