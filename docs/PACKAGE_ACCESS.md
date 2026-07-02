@@ -4,26 +4,29 @@
 
 Consumer repos (`Fremont-Global-Web`, `Fremont-AgentOps-Web`, `Fremont-AgentOps-UI`) must be granted read access or their CI `npm ci` will fail with 401/403.
 
-## Grant consumer CI access
+## Consumer CI access (package is public)
 
-Consumer workflows authenticate with `GITHUB_TOKEN` (`packages: read`). Each consumer repo must be allowed to read this package.
+This package is **public**. Consumer workflows authenticate with the built-in
+`GITHUB_TOKEN` (`packages: read`) — no per-repo grant and no extra secret is
+required. GitHub Packages still requires *a* token to pull, but any valid
+`GITHUB_TOKEN` works.
 
-### Automated (preferred)
+### Making the package public (one-time)
 
-Run **Actions → Grant package access to consumers → Run workflow** in this repository.  
-The workflow also runs automatically after a successful **Publish to GitHub Packages** run.
+1. Open the package page:  
+   https://github.com/orgs/FremontGlobalSolutions/packages/npm/package/locale-switcher
 
-### Manual (org admin)
+2. Right sidebar → **Package settings**.
 
-1. Open the package settings:  
-   https://github.com/orgs/FremontGlobalSolutions/packages/npm/package/locale-switcher/settings
+3. Bottom of the page → **Danger Zone** → **Change visibility** → **Public**
+   (type `locale-switcher` to confirm).
 
-2. Under **Manage Actions access**, add:
-   - `Fremont-Global-Web`
-   - `Fremont-AgentOps-Web`
-   - `Fremont-AgentOps-UI`
+### If you keep it private instead
 
-3. Re-run failed CI workflows on those repos.
+You must either grant each consumer repo access (package settings →
+**Manage Actions access** → **Add repository**, when available) or switch
+consumer workflows to a PAT secret with `read:packages` (name it something
+other than `GITHUB_*`, e.g. `PACKAGES_READ_TOKEN`).
 
 ## Local development
 
