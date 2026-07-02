@@ -1,7 +1,14 @@
 {
   "name": "@fremont/locale-switcher",
   "version": "0.1.0",
-  "description": "Shared locale dropdown UI for Fremont marketing sites",
+  "description": "Shared locale dropdown UI for Fremont web apps",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FremontGlobalSolutions/Fremont-Locale-Switcher.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "type": "module",
   "sideEffects": [
     "*.scss",

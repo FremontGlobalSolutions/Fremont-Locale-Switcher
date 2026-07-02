@@ -4,11 +4,23 @@ Shared locale dropdown UI (flags + pill trigger + accessible listbox panel) for 
 
 ## Install
 
+Published to GitHub Packages:
+
 ```bash
-npm install github:FremontGlobalSolutions/Fremont-Locale-Switcher
+# .npmrc (repo root or ~/.npmrc)
+@fremont:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
+
+npm install @fremont/locale-switcher
 ```
 
-For local sibling-repo development:
+In `package.json`:
+
+```json
+"@fremont/locale-switcher": "0.1.0"
+```
+
+For local sibling-repo development you can still use:
 
 ```bash
 npm install file:../Fremont-Locale-Switcher
