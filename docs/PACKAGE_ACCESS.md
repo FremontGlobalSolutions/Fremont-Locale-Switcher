@@ -4,12 +4,21 @@
 
 Consumer repos (`Fremont-Global-Web`, `Fremont-AgentOps-Web`, `Fremont-AgentOps-UI`) must be granted read access or their CI `npm ci` will fail with 401/403.
 
-## One-time setup (org admin)
+## Grant consumer CI access
+
+Consumer workflows authenticate with `GITHUB_TOKEN` (`packages: read`). Each consumer repo must be allowed to read this package.
+
+### Automated (preferred)
+
+Run **Actions → Grant package access to consumers → Run workflow** in this repository.  
+The workflow also runs automatically after a successful **Publish to GitHub Packages** run.
+
+### Manual (org admin)
 
 1. Open the package settings:  
    https://github.com/orgs/FremontGlobalSolutions/packages/npm/package/locale-switcher/settings
 
-2. Under **Manage Actions access**, click **Add repository** and add:
+2. Under **Manage Actions access**, add:
    - `Fremont-Global-Web`
    - `Fremont-AgentOps-Web`
    - `Fremont-AgentOps-UI`

@@ -1,0 +1,34 @@
+name: Grant package access to consumers
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Publish to GitHub Packages]
+    types: [completed]
+
+permissions:
+  packages: write
+
+jobs:
+  grant:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Grant Actions read access to consumer repositories
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          PACKAGE="locale-switcher"
+          ORG="FremontGlobalSolutions"
+          for repo_id in \
+            1027727247 \
+            1263804260 \
+            1236692283
+          do
+            echo "Granting package access to repository id ${repo_id}..."
+            gh api --method PUT \
+              -H "Accept: application/vnd.github+json" \
+              "orgs/${ORG}/packages/npm/${PACKAGE}/actions/permissions/repositories/${repo_id}"
+          done
+          echo "Done. Consumer repos: Fremont-Global-Web, Fremont-AgentOps-Web, Fremont-AgentOps-UI"
