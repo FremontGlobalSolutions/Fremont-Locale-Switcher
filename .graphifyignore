@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+target/
+out/
+bin/graphify/
+bin/rtk/
+.git/
+graphify-out/
+coverage/
+.next/
+.turbo/
+vendor/
